@@ -1,23 +1,41 @@
-name: Generate and Deploy Report
+name: Build and Deploy Report
 
 on:
   push:
-    branches: [main]  # or use workflow_dispatch for manual trigger
+    branches: [main]
 
 jobs:
-  build-and-deploy:
+  generate-report:
     runs-on: ubuntu-latest
+    outputs:
+      artifact-name: ${{ steps.set-output.outputs.artifact-name }}
     steps:
-      - name: Checkout source code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate Report
+      - name: Generate HTML Report
         run: |
-          mkdir -p output
-          echo "<html><body><h1>Test Report</h1><p>Generated at $(date)</p></body></html>" > output/index.html
+          mkdir -p report
+          echo "<html><body><h1>My Report</h1><p>Generated on $(date)</p></body></html>" > report/index.html
+
+      - name: Upload report as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: html-report
+          path: report/
+
+  deploy-report:
+    needs: generate-report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: html-report
+          path: output
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GHP_TOKEN }}
           publish_dir: ./output
