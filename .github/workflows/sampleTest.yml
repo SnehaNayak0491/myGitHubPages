@@ -1,32 +1,23 @@
-name: Deploy Dummy HTML to GitHub Pages
+name: Generate and Deploy Report
 
 on:
   push:
-    branches: [main]  # Trigger on push to main
+    branches: [main]  # or use workflow_dispatch for manual trigger
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Generate dummy HTML file
+      - name: Generate Report
         run: |
-          mkdir -p public
-          echo "<!DOCTYPE html>
-          <html>
-            <head><title>Dummy Page</title></head>
-            <body>
-              <h1>Hello from GitHub Pages!</h1>
-              <p>Generated on $(date)</p>
-            </body>
-          </html>" > public/index.html
+          mkdir -p output
+          echo "<html><body><h1>Test Report</h1><p>Generated at $(date)</p></body></html>" > output/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
-          publish_branch: gh-pages
+          publish_dir: ./output
